@@ -3,6 +3,9 @@ kind: List
 metadata:
   resourceVersion: ""
   selfLink: "" 
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
 apiVersion: v1
 items:
 - apiVersion: v1
