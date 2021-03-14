@@ -1,5 +1,5 @@
 apiVersion: v2
-name: pet-battle-analytics-fathom
+name: fathom
 description: Pet Battle analytics using Fathom
 type: application
 version: 1.0.0
