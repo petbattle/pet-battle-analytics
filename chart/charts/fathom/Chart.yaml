@@ -1,0 +1,9 @@
+apiVersion: v2
+name: pet-battle-analytics-fathom
+description: Pet Battle analytics using Fathom
+type: application
+version: 1.0.0
+appVersion: 1.0.0
+home: https://petbattle.github.io/helm-charts
+maintainers:
+- name: noelo

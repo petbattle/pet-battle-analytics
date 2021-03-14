@@ -1,5 +1,2 @@
 analytics:
   enabled: true
-Fathom:
-  Path: localhost
-  Code: abcde
