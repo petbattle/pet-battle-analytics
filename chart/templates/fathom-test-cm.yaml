@@ -8,4 +8,4 @@ metadata:
     app: fathom
     app.kubernetes.io/component: fathom
     app.kubernetes.io/instance: pet-battle-analytics
-    testing: {{ (lookup "route.openshift.io/v1" "Route" .Release.Namespace "keycloak").spec.host }}
+    testing: {{ (lookup "route.openshift.io/v1" "Route" .Release.Namespace "testsvc").spec.host }}

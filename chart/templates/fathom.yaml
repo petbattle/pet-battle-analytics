@@ -1,4 +1,8 @@
 {{- if .Values.analytics.enabled }}
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: "" 
 apiVersion: v1
 items:
 - apiVersion: route.openshift.io/v1
@@ -115,7 +119,7 @@ items:
     fathom-script.js: "<!-- Fathom - simple website analytics - https://github.com/usefathom/fathom
     -->\n<script>\n(function(f, a, t, h, o, m){\n\ta[h]=a[h]||function(){\n\t\t(a[h].q=a[h].q||[]).push(arguments)\n\t};\n\to=f.createElement('script'),\n\tm=f.getElementsByTagName('script')[0];\n\to.async=1;
     o.src=t; o.id='fathom-script';\n\tm.parentNode.insertBefore(o,m)\n})(document,
-    window, '//{{ (lookup "route.openshift.io/v1" "Route" .Release.Namespace "keycloak").spec.host }}/tracker.js', 'fathom');\nfathom('set',
+    window, '//{{ (lookup "route.openshift.io/v1" "Route" .Release.Namespace "testsvc").spec.host }}/tracker.js', 'fathom');\nfathom('set',
     'siteId', 'bbb');\nfathom('trackPageview');\n</script>\n<!-- / Fathom -->\n"
   kind: ConfigMap
   metadata:
@@ -123,9 +127,63 @@ items:
     labels:
       app: fathom
       app.kubernetes.io/component: fathom
-      app.kubernetes.io/instance: pet-battle-analytics
-kind: List
-metadata:
-  resourceVersion: ""
-  selfLink: ""  
+      app.kubernetes.io/instance: pet-battle-analytics  
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: Role
+  metadata:
+    name: cm-create-role
+    annotations:
+      "helm.sh/hook": pre-install,post-upgrade
+      "helm.sh/hook-weight": "-4"
+      "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+  rules:
+    - apiGroups:
+        - ""
+      resources:
+        - configmaps
+      verbs:
+        - create
+        - list
+        - delete
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    name: cm-create-rolebinding
+    annotations:
+      "helm.sh/hook": pre-install,post-upgrade
+      "helm.sh/hook-weight": "-3"
+      "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: cm-create-role
+  subjects:
+    - kind: ServiceAccount
+      name: cm-create-sa
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: cm-create-sa
+    annotations:
+      "helm.sh/hook": pre-install,post-upgrade
+      "helm.sh/hook-weight": "-2"
+      "helm.sh/hook-delete-policy": hook-succeeded,hook-failed  
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    name: create-site 
+    annotations:
+      "helm.sh/hook": post-install,post-upgrade
+      "helm.sh/hook-weight": "-1"
+      "helm.sh/hook-delete-policy": hook-succeeded
+  spec:
+    containers:
+    - name: create-analytics-site 
+      image: quay.io/openshift/origin-cli:4.6
+      imagePullPolicy: IfNotPresent
+      command: ['sh', '-cx', 'sleep 10;curl -s http://fathom:8080/api/sites -X POST -H "Accept: application/json" -H "Content-Type: application/json" -d "{\"name\":\"petbattle\"}" -o /tmp/fathom.json;oc whoami;oc create cm fathom-siteid --from-file=/tmp/fathom.json']
+    restartPolicy: Never
+    terminationGracePeriodSeconds: 0
+    serviceAccount: cm-create-sa
+    serviceAccountName: cm-create-sa
 {{- end}}
