@@ -18,6 +18,8 @@ items:
   spec:
     port:
       targetPort: 8080-tcp
+    tls:
+      termination: edge
     to:
       kind: Service
       name: fathom
@@ -179,8 +181,8 @@ items:
         - | 
           sleep 10;
           HOST=`oc get route fathom -o json | jq -r '.spec.host'`;
-          TID=`curl -s http://fathom:8080/api/sites -X POST -H "Accept: application/json" -H "Content-Type: application/json" -d "{\"name\":\"petbattle\"}"`;
-          oc create cm {{ .Values.config.cmname }} --from-literal=FATHOMHOST=$HOST --from-literal=FATHOM_TRACKING_ID=$TID
+          curl -s http://fathom:8080/api/sites -X POST -H "Accept: application/json" -H "Content-Type: application/json" -d "{\"name\":\"petbattle\"}" -o /tmp/fathom-config.json;
+          oc create cm {{ .Values.config.cmname }} --from-literal=FATHOMHOST=$HOST --from-file=/tmp/fathom-config.json
     restartPolicy: Never
     terminationGracePeriodSeconds: 0
     serviceAccount: helm-hook-sa
