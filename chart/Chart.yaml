@@ -7,7 +7,3 @@ appVersion: 1.0.0
 home: https://petbattle.github.io/helm-charts
 maintainers:
 - name: noelo
-dependencies:
-- name: fathom
-  version: "1.0.0"
-  repository: "file://charts/fathom"
