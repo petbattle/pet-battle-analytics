@@ -178,8 +178,8 @@ items:
         - -cx
         - | 
           sleep 10;
-          HOST=`oc get route fathom -o json | jq '.spec.host'`;
-          TID=`curl -s http://fathom:8080/api/sites -X POST -H "Accept: application/json" -H "Content-Type: application/json" -d "{\"name\":\"petbattle\"}"|jq '.Data.trackingId'`;
+          HOST=`oc get route fathom -o json | jq -r '.spec.host'`;
+          TID=`curl -s http://fathom:8080/api/sites -X POST -H "Accept: application/json" -H "Content-Type: application/json" -d "{\"name\":\"petbattle\"}"`;
           oc create cm {{ .Values.config.cmname }} --from-literal=FATHOMHOST=$HOST --from-literal=FATHOM_TRACKING_ID=$TID
     restartPolicy: Never
     terminationGracePeriodSeconds: 0
