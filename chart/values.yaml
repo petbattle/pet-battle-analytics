@@ -1,2 +1,4 @@
 analytics:
   enabled: true
+config:
+  cmname: fathom-client-config
