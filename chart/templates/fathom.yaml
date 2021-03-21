@@ -181,8 +181,9 @@ items:
         - | 
           sleep 10;
           HOST=`oc get route fathom -o json | jq -r '.spec.host'`;
-          curl -s http://fathom:8080/api/sites -X POST -H "Accept: application/json" -H "Content-Type: application/json" -d "{\"name\":\"petbattle\"}" -o /tmp/fathom-config.json;
-          oc create cm {{ .Values.config.cmname }} --from-literal=FATHOMHOST=$HOST --from-file=/tmp/fathom-config.json
+          curl -s http://fathom:8080/api/sites -X POST -H "Accept: application/json" -H "Content-Type: application/json" -d "{\"name\":\"petbattle\"}" -o /tmp/fathom-config.json
+          cat /tmp/fathom-config.json | jq --arg value ${HOST} '. + {host: $value}' > /tmp/fathom.json
+          oc create cm {{ .Values.config.cmname }} --from-file=/tmp/fathom.json
     restartPolicy: Never
     terminationGracePeriodSeconds: 0
     serviceAccount: helm-hook-sa
