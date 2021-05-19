@@ -13,12 +13,13 @@ items:
     labels:
       app: fathom
       app.kubernetes.io/component: fathom
-      app.kubernetes.io/instance: pet-battle-analytics
+      app.kubernetes.io/instance: {{ .Values.site_name }}-analytics
     name: fathom
   spec:
     port:
       targetPort: 8080-tcp
     tls:
+      insecureEdgeTerminationPolicy: Redirect
       termination: edge
     to:
       kind: Service
@@ -33,7 +34,7 @@ items:
     labels:
       app: fathom
       app.kubernetes.io/component: fathom
-      app.kubernetes.io/instance: pet-battle-analytics
+      app.kubernetes.io/instance: {{ .Values.site_name }}-analytics
     name: fathom
   spec:
     ports:
@@ -51,7 +52,7 @@ items:
     labels:
       app: fathom
       app.kubernetes.io/component: fathom
-      app.kubernetes.io/instance: pet-battle-analytics
+      app.kubernetes.io/instance: {{ .Values.site_name }}-analytics
     name: fathom
   spec:
     progressDeadlineSeconds: 600
@@ -99,7 +100,7 @@ items:
     labels:
       app: fathom
       app.kubernetes.io/component: fathom
-      app.kubernetes.io/instance: pet-battle-analytics
+      app.kubernetes.io/instance: {{ .Values.site_name }}-analytics
     name: fathom
   spec:
     lookupPolicy:
@@ -162,6 +163,7 @@ items:
       "helm.sh/hook": pre-install,post-upgrade
       "helm.sh/hook-weight": "-2"
       "helm.sh/hook-delete-policy": hook-succeeded,hook-failed  
+{{- if .Values.create_site_config }}
 - apiVersion: v1
   kind: Pod
   metadata:
@@ -181,11 +183,12 @@ items:
         - | 
           sleep 10;
           HOST=`oc get route fathom -o json | jq -r '.spec.host'`;
-          curl -s http://fathom:8080/api/sites -X POST -H "Accept: application/json" -H "Content-Type: application/json" -d "{\"name\":\"petbattle\"}" -o /tmp/fathom-config.json
+          curl -s http://fathom:8080/api/sites -X POST -H "Accept: application/json" -H "Content-Type: application/json" -d "{\"name\":\"{{ .Values.site_name }}\"}" -o /tmp/fathom-config.json
           cat /tmp/fathom-config.json | jq --arg value ${HOST} '. + {host: $value}' > /tmp/fathom.json
           oc create cm {{ .Values.config.cmname }} --from-file=/tmp/fathom.json
     restartPolicy: Never
     terminationGracePeriodSeconds: 0
     serviceAccount: helm-hook-sa
     serviceAccountName: helm-hook-sa
+{{- end}}
 {{- end}}

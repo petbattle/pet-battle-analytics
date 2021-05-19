@@ -2,3 +2,5 @@ analytics:
   enabled: true
 config:
   cmname: fathom-client-config
+site_name: pet-battle
+create_site_config: true
